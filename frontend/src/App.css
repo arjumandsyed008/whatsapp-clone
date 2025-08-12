@@ -1,0 +1,76 @@
+.app {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  width: 30%;
+  background-color: #f0f2f5;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+}
+
+.chat {
+  padding: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+
+.chat:hover {
+  background-color: #e9ebee;
+}
+
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #efeae2;
+}
+
+.incoming {
+  background-color: #fff;
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 7px;
+  max-width: 60%;
+}
+
+.outgoing {
+  background-color: #d9fdd3;
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 7px;
+  max-width: 60%;
+  margin-left: auto;
+}
+
+.input-box {
+  display: flex;
+  padding: 10px;
+  background-color: #f0f2f5;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 20px;
+  outline: none;
+}
+
+.input-box button {
+  margin-left: 8px;
+  padding: 8px 12px;
+  background-color: #00a884;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}

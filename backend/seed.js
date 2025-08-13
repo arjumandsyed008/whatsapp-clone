@@ -13,6 +13,7 @@ mongoose.connect(mongoUri)
     console.log('✅ Connected to MongoDB');
 
     const sampleData = [
+      // Existing 10 messages
       {
         message_id: 'msg1',
         wa_id: '919876543210',
@@ -122,13 +123,125 @@ mongoose.connect(mongoUri)
         status: 'read',
         timestamp: new Date(Date.now() - 86300000),
         raw: { contactName: 'Priya Sharma' }
+      },
+
+      // New 10 messages
+      {
+        message_id: 'msg11',
+        wa_id: '919666666666',
+        from: '919666666666',
+        to: 'me',
+        text: 'Good morning! Are we still on for lunch?',
+        direction: 'in',
+        status: 'sent',
+        timestamp: new Date(Date.now() - 1800000),
+        raw: { contactName: 'Meera Nair' }
+      },
+      {
+        message_id: 'msg12',
+        wa_id: 'me',
+        from: 'me',
+        to: '919666666666',
+        text: 'Yes, see you at 1 PM sharp!',
+        direction: 'out',
+        status: 'delivered',
+        timestamp: new Date(Date.now() - 1700000),
+        raw: { contactName: 'Meera Nair' }
+      },
+      {
+        message_id: 'msg13',
+        wa_id: '919999999999',
+        from: 'me',
+        to: '919999999999',
+        text: 'Did you review the new proposal?',
+        direction: 'out',
+        status: 'sent',
+        timestamp: new Date(Date.now() - 5000000),
+        raw: { contactName: 'Ravi Kumar' }
+      },
+      {
+        message_id: 'msg14',
+        wa_id: '919999999999',
+        from: '919999999999',
+        to: 'me',
+        text: 'Yes, looks good. I’ll send it to the client.',
+        direction: 'in',
+        status: 'read',
+        timestamp: new Date(Date.now() - 4950000),
+        raw: { contactName: 'Ravi Kumar' }
+      },
+      {
+        message_id: 'msg15',
+        wa_id: '919444444444',
+        from: 'me',
+        to: '919444444444',
+        text: 'Flight is booked for Monday at 9am.',
+        direction: 'out',
+        status: 'sent',
+        timestamp: new Date(Date.now() - 21600000),
+        raw: { contactName: 'Travel Agent' }
+      },
+      {
+        message_id: 'msg16',
+        wa_id: '919444444444',
+        from: '919444444444',
+        to: 'me',
+        text: 'Perfect, I’ll send the itinerary.',
+        direction: 'in',
+        status: 'delivered',
+        timestamp: new Date(Date.now() - 21500000),
+        raw: { contactName: 'Travel Agent' }
+      },
+      {
+        message_id: 'msg17',
+        wa_id: '919333333333',
+        from: '919333333333',
+        to: 'me',
+        text: 'Meeting postponed to Thursday.',
+        direction: 'in',
+        status: 'sent',
+        timestamp: new Date(Date.now() - 30000000),
+        raw: { contactName: 'Office Admin' }
+      },
+      {
+        message_id: 'msg18',
+        wa_id: 'me',
+        from: 'me',
+        to: '919333333333',
+        text: 'Got it, I’ll update the team.',
+        direction: 'out',
+        status: 'read',
+        timestamp: new Date(Date.now() - 29900000),
+        raw: { contactName: 'Office Admin' }
+      },
+      {
+        message_id: 'msg19',
+        wa_id: '919222222222',
+        from: 'me',
+        to: '919222222222',
+        text: 'Happy Anniversary! 🎊',
+        direction: 'out',
+        status: 'read',
+        timestamp: new Date(Date.now() - 604800000),
+        raw: { contactName: 'Rajesh Mehta' }
+      },
+      {
+        message_id: 'msg20',
+        wa_id: '919222222222',
+        from: '919222222222',
+        to: 'me',
+        text: 'Thank you! Means a lot.',
+        direction: 'in',
+        status: 'read',
+        timestamp: new Date(Date.now() - 604700000),
+        raw: { contactName: 'Rajesh Mehta' }
       }
     ];
 
     await Message.deleteMany({});
     await Message.insertMany(sampleData);
 
-    console.log('✅ Sample messages with contact names inserted!');
+    console.log('✅ 20 sample messages with contact names inserted!');
     process.exit();
   })
   .catch(err => {

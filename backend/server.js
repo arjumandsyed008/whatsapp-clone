@@ -8,7 +8,6 @@ require('dotenv').config();
 const apiRoutes = require('./routes/api');
 const webhookRoutes = require('./routes/webhook');
 
-// Create Express app
 const app = express();
 
 // Middleware
@@ -26,19 +25,17 @@ app.use('/webhook', webhookRoutes);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  // Path to Vite build output
   const frontendPath = path.resolve(__dirname, '..', 'frontend', 'dist');
   console.log(`📂 Serving frontend from: ${frontendPath}`);
 
   app.use(express.static(frontendPath));
 
-  // Fallback for React Router
-  app.get('*', (req, res) => {
+  // React Router fallback — regex avoids path-to-regexp '*' issue
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
 }
 
-// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

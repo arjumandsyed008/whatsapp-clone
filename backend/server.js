@@ -4,9 +4,11 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+// Import routes
 const apiRoutes = require('./routes/api');
 const webhookRoutes = require('./routes/webhook');
 
+// Create Express app
 const app = express();
 
 // Middleware
@@ -22,13 +24,15 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api', apiRoutes);
 app.use('/webhook', webhookRoutes);
 
-// Serve frontend build in production
+// Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  // For Vite builds
-  const frontendPath = path.join(__dirname, '../frontend/dist');
-  // For CRA builds, use '../frontend/build'
+  // Path to Vite build output
+  const frontendPath = path.resolve(__dirname, '..', 'frontend', 'dist');
+  console.log(`📂 Serving frontend from: ${frontendPath}`);
+
   app.use(express.static(frontendPath));
 
+  // Fallback for React Router
   app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });

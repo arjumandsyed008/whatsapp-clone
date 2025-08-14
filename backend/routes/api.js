@@ -13,6 +13,7 @@ router.get('/conversations', async (req, res) => {
         $group: {
           _id: "$wa_id",
           lastMessage: { $first: "$$ROOT" },
+          contactName: { $first: "$raw.contactName" }, // ✅ always pick the latest stored name
           unreadCount: {
             $sum: {
               $cond: [
@@ -29,7 +30,7 @@ router.get('/conversations', async (req, res) => {
 
     const formatted = convs.map(c => ({
       wa_id: c._id,
-      contactName: c.lastMessage?.raw?.contactName || c._id, // Stored name or fallback to wa_id
+      contactName: c.contactName || c.lastMessage?.raw?.contactName || c._id, // ✅ always try name first
       lastMessage: c.lastMessage?.text || "",
       lastMessageStatus: c.lastMessage?.status || "",
       lastMessageTime: c.lastMessage?.timestamp
@@ -51,16 +52,22 @@ router.get('/conversations', async (req, res) => {
  */
 router.get('/conversations/:wa_id/messages', async (req, res) => {
   try {
-    // Mark all incoming 'sent' messages as 'read'
     await Message.updateMany(
       { wa_id: req.params.wa_id, direction: 'in', status: 'sent' },
       { $set: { status: 'read' } }
     );
 
-    // Fetch updated messages
-    const msgs = await Message.find({ wa_id: req.params.wa_id }).sort({ timestamp: 1 });
+    const msgs = await Message.find({ wa_id: req.params.wa_id })
+      .sort({ timestamp: 1 })
+      .lean();
 
-    res.json(msgs);
+    // ✅ Ensure contactName is always included
+    const enrichedMsgs = msgs.map(m => ({
+      ...m,
+      contactName: m.raw?.contactName || req.params.wa_id
+    }));
+
+    res.json(enrichedMsgs);
   } catch (err) {
     console.error(`Error fetching messages for ${req.params.wa_id}:`, err);
     res.status(500).json({ error: err.message });
@@ -70,7 +77,6 @@ router.get('/conversations/:wa_id/messages', async (req, res) => {
 /**
  * Send message
  */
-// Send message
 router.post('/conversations/:wa_id/messages', async (req, res) => {
   try {
     const { text, from, to, contactName } = req.body;
@@ -89,7 +95,10 @@ router.post('/conversations/:wa_id/messages', async (req, res) => {
       }
     });
 
-    res.json(msg);
+    res.json({
+      ...msg.toObject(),
+      contactName: contactName || req.params.wa_id
+    });
   } catch (err) {
     console.error(`Error sending message to ${req.params.wa_id}:`, err);
     res.status(500).json({ error: err.message });

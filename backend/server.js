@@ -11,7 +11,12 @@ const webhookRoutes = require('./routes/webhook');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://whatsapp-clone-97k9.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // MongoDB connection

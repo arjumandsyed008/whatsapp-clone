@@ -1,38 +1,63 @@
 const express = require('express');
-const Message = require('../models/Message');
 const router = express.Router();
+const Message = require('../models/Message');
 
+// ✅ Webhook verification (GET)
+router.get('/', (req, res) => {
+  const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode && token) {
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('✅ Webhook verified');
+      res.status(200).send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+// ✅ Webhook message receiver (POST)
 router.post('/', async (req, res) => {
-  const payload = req.body;
+  try {
+    const body = req.body;
 
-  if (payload.messages) {
-    for (const m of payload.messages) {
-      await Message.create({
-        message_id: m.id,
-        meta_msg_id: m.context?.id || null,
-        wa_id: payload.contacts?.[0]?.wa_id || '',
-        from: m.from,
-        to: m.to,
-        text: m.text?.body || '',
-        attachments: m.image || m.document ? [m.image || m.document] : [],
-        direction: 'in',
-        status: 'sent',
-        timestamp: new Date(Number(m.timestamp) * 1000),
-        raw: payload
-      });
+    if (body.object) {
+      const entry = body.entry?.[0];
+      const change = entry?.changes?.[0];
+      const value = change?.value;
+      const message = value?.messages?.[0];
+
+      if (message) {
+        const wa_id = message.from;
+        const contactName = value?.contacts?.[0]?.profile?.name || wa_id;
+
+        await Message.create({
+          message_id: message.id,
+          wa_id,
+          from: wa_id,
+          to: process.env.WHATSAPP_PHONE_NUMBER_ID || 'me',
+          text: message.text?.body || '',
+          direction: 'in',
+          status: 'sent',
+          timestamp: new Date(Number(message.timestamp) * 1000),
+          raw: { contactName }
+        });
+
+        console.log(`💬 Message stored from ${contactName}`);
+      }
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
     }
+  } catch (err) {
+    console.error('❌ Webhook error:', err);
+    res.sendStatus(500);
   }
-
-  if (payload.statuses) {
-    for (const s of payload.statuses) {
-      await Message.updateOne(
-        { $or: [{ message_id: s.id }, { meta_msg_id: s.id }] },
-        { $set: { status: s.status } }
-      );
-    }
-  }
-
-  res.sendStatus(200);
 });
 
 module.exports = router;

@@ -13,7 +13,7 @@ const app = express();
 // ✅ CORS setup
 app.use(cors({
   origin: [
-    'https://whatsapp-clone-eta-swart.vercel.app', // your Vercel frontend URL
+    'https://whatsapp-clone-lake-sigma.vercel.app/', // your Vercel frontend URL
     'http://localhost:5173' // for local dev
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],

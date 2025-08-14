@@ -3,7 +3,7 @@ const Message = require('../models/Message');
 const router = express.Router();
 
 /**
- * Get conversations list
+ * ✅ Get conversations list
  */
 router.get('/conversations', async (req, res) => {
   try {
@@ -13,7 +13,6 @@ router.get('/conversations', async (req, res) => {
         $group: {
           _id: "$wa_id",
           lastMessage: { $first: "$$ROOT" },
-          contactName: { $first: "$raw.contactName" }, // ✅ always pick the latest stored name
           unreadCount: {
             $sum: {
               $cond: [
@@ -30,7 +29,7 @@ router.get('/conversations', async (req, res) => {
 
     const formatted = convs.map(c => ({
       wa_id: c._id,
-      contactName: c.contactName || c.lastMessage?.raw?.contactName || c._id, // ✅ always try name first
+      contactName: c.lastMessage?.raw?.contactName || c._id,
       lastMessage: c.lastMessage?.text || "",
       lastMessageStatus: c.lastMessage?.status || "",
       lastMessageTime: c.lastMessage?.timestamp
@@ -41,14 +40,13 @@ router.get('/conversations', async (req, res) => {
 
     res.json(formatted);
   } catch (err) {
-    console.error("Error fetching conversations:", err);
+    console.error("❌ Error fetching conversations:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 /**
- * Get messages for a conversation
- * Also mark unread incoming messages as 'read'
+ * ✅ Get messages for a conversation & mark unread as read
  */
 router.get('/conversations/:wa_id/messages', async (req, res) => {
   try {
@@ -57,25 +55,16 @@ router.get('/conversations/:wa_id/messages', async (req, res) => {
       { $set: { status: 'read' } }
     );
 
-    const msgs = await Message.find({ wa_id: req.params.wa_id })
-      .sort({ timestamp: 1 })
-      .lean();
-
-    // ✅ Ensure contactName is always included
-    const enrichedMsgs = msgs.map(m => ({
-      ...m,
-      contactName: m.raw?.contactName || req.params.wa_id
-    }));
-
-    res.json(enrichedMsgs);
+    const msgs = await Message.find({ wa_id: req.params.wa_id }).sort({ timestamp: 1 });
+    res.json(msgs);
   } catch (err) {
-    console.error(`Error fetching messages for ${req.params.wa_id}:`, err);
+    console.error(`❌ Error fetching messages for ${req.params.wa_id}:`, err);
     res.status(500).json({ error: err.message });
   }
 });
 
 /**
- * Send message
+ * ✅ Send message
  */
 router.post('/conversations/:wa_id/messages', async (req, res) => {
   try {
@@ -90,17 +79,12 @@ router.post('/conversations/:wa_id/messages', async (req, res) => {
       direction: 'out',
       status: 'sent',
       timestamp: new Date(),
-      raw: {
-        contactName: contactName || req.params.wa_id // ✅ fallback to number if name missing
-      }
+      raw: { contactName: contactName || req.params.wa_id }
     });
 
-    res.json({
-      ...msg.toObject(),
-      contactName: contactName || req.params.wa_id
-    });
+    res.json(msg);
   } catch (err) {
-    console.error(`Error sending message to ${req.params.wa_id}:`, err);
+    console.error(`❌ Error sending message to ${req.params.wa_id}:`, err);
     res.status(500).json({ error: err.message });
   }
 });

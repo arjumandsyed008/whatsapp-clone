@@ -10,25 +10,28 @@ const webhookRoutes = require('./routes/webhook');
 
 const app = express();
 
-// Middleware
+// ✅ CORS configuration — allow Vercel frontend + localhost
 app.use(cors({
-  origin: 'https://whatsapp-clone-97k9.onrender.com',
+  origin: [
+    'http://localhost:3000',
+    'https://whatsapp-clone-git-main-chats-projects-189443e0.vercel.app'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 
 app.use(express.json());
 
-// MongoDB connection
+// ✅ MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// API routes
+// ✅ API routes
 app.use('/api', apiRoutes);
 app.use('/webhook', webhookRoutes);
 
-// Serve frontend in production
+// ✅ Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.resolve(__dirname, '..', 'frontend', 'dist');
   console.log(`📂 Serving frontend from: ${frontendPath}`);
@@ -41,6 +44,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

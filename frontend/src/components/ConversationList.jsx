@@ -17,7 +17,6 @@ export default function ConversationList({ onSelect }) {
           convList = data.conversations;
         }
 
-        // Normalize contactName from raw.contactName or fallback to wa_id
         convList = convList.map(c => ({
           ...c,
           contactName: c.contactName || c.raw?.contactName || c.wa_id || c._id || c.id
@@ -30,6 +29,7 @@ export default function ConversationList({ onSelect }) {
         setConvs([]);
       });
   }, [API_URL]);
+
 
   const getStatusIcon = (status) => {
     if (status === 'read') {

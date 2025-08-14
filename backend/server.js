@@ -10,16 +10,17 @@ const webhookRoutes = require('./routes/webhook');
 
 const app = express();
 
-// ✅ CORS configuration — allow Vercel frontend + localhost
+// ✅ CORS setup
 app.use(cors({
   origin: [
-    'http://localhost:3000',
-    'https://whatsapp-clone-git-main-chats-projects-189443e0.vercel.app'
+    'https://whatsapp-clone-eta-swart.vercel.app', // your Vercel frontend URL
+    'http://localhost:5173' // for local dev
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 
+// Middleware
 app.use(express.json());
 
 // ✅ MongoDB connection
@@ -38,7 +39,7 @@ if (process.env.NODE_ENV === 'production') {
 
   app.use(express.static(frontendPath));
 
-  // React Router fallback — regex avoids path-to-regexp '*' issue
+  // React Router fallback
   app.get(/.*/, (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
